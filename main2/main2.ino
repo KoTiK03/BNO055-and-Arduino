@@ -9,7 +9,6 @@
 #include <Adafruit_Sensor.h>  //Библиотека для работы с разного рода датчиками всякими
 #include <Adafruit_BNO055.h>  //Её производная
 #include <utility/imumaths.h>
-#include <print.h>
 
 //Переменные
 int i;
@@ -269,38 +268,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x29);
 
 void displaySensorDetails(void) {
   sensor_t sensor;
-// Это внутренняя шняга библиотеки которая по сути просто содержит тип сенсора и спецификацию на него. Наш тип вроде (3) (константа SENSOR_TYPE_ORIENTATION)
-//   typedef struct {
-//   char name[12];     /**< sensor name */
-//   int32_t version;   /**< version of the hardware + driver */
-//   int32_t sensor_id; /**< unique sensor identifier */
-//   int32_t type;      /**< this sensor's type (ex. SENSOR_TYPE_LIGHT) */
-//   float max_value;   /**< maximum value of this sensor's value in SI units */
-//   float min_value;   /**< minimum value of this sensor's value in SI units */
-//   float resolution; /**< smallest difference between two values reported by this
-//                        sensor */
-//   int32_t min_delay; /**< min delay in microseconds between events. zero = not a
-//                         constant rate */
-// } sensor_t;
-
   bno.getSensor(&sensor);
-
-//   void Adafruit_BNO055::getSensor(sensor_t *sensor) {
-//   /* Clear the sensor_t object */
-//   memset(sensor, 0, sizeof(sensor_t));
-
-//   /* Insert the sensor name in the fixed length char array */
-//   strncpy(sensor->name, "BNO055", sizeof(sensor->name) - 1);
-//   sensor->name[sizeof(sensor->name) - 1] = 0;
-//   sensor->version = 1;
-//   sensor->sensor_id = _sensorID;
-//   sensor->type = SENSOR_TYPE_ORIENTATION;
-//   sensor->min_delay = 0;
-//   sensor->max_value = 0.0F;
-//   sensor->min_value = 0.0F;
-//   sensor->resolution = 0.01F;
-// }
-
   Serial.println("------------------------------------");
   Serial.print("Sensor:       ");
   Serial.println(sensor.name);
@@ -323,105 +291,12 @@ void displaySensorDetails(void) {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("Orientation Sensor Test");
   Serial.println("");
   /* Запуск сенсора */
   if (!bno.begin()) {
 
-//     bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode) {
-
-//   if (!i2c_dev->begin()) {
-//     return false;
-//   }
-
-//   /* Make sure we have the right device */
-//   uint8_t id = read8(BNO055_CHIP_ID_ADDR);
-//   if (id != BNO055_ID) {
-//     delay(1000); // hold on for boot
-//     id = read8(BNO055_CHIP_ID_ADDR);
-//     if (id != BNO055_ID) {
-//       return false; // still not? ok bail
-//     }
-//   }
-
-//   /* Switch to config mode (just in case since this is the default) */
-//   setMode(OPERATION_MODE_CONFIG);
-
-//   /* Reset */
-//   write8(BNO055_SYS_TRIGGER_ADDR, 0x20);
-//   /* Delay incrased to 30ms due to power issues https://tinyurl.com/y375z699 */
-//   delay(30);
-//   while (read8(BNO055_CHIP_ID_ADDR) != BNO055_ID) {
-//     delay(10);
-//   }
-//   delay(50);
-
-//   /* Set to normal power mode */
-//   write8(BNO055_PWR_MODE_ADDR, POWER_MODE_NORMAL);
-//   delay(10);
-
-//   write8(BNO055_PAGE_ID_ADDR, 0);
-
-//   /* Set the output units */
-//   /*
-//   uint8_t unitsel = (0 << 7) | // Orientation = Android
-//                     (0 << 4) | // Temperature = Celsius
-//                     (0 << 2) | // Euler = Degrees
-//                     (1 << 1) | // Gyro = Rads
-//                     (0 << 0);  // Accelerometer = m/s^2
-//   write8(BNO055_UNIT_SEL_ADDR, unitsel);
-//   */
-
-//   /* Configure axis mapping (see section 3.4) */
-//   /*
-//   write8(BNO055_AXIS_MAP_CONFIG_ADDR, REMAP_CONFIG_P2); // P0-P7, Default is P1
-//   delay(10);
-//   write8(BNO055_AXIS_MAP_SIGN_ADDR, REMAP_SIGN_P2); // P0-P7, Default is P1
-//   delay(10);
-//   */
-
-//   write8(BNO055_SYS_TRIGGER_ADDR, 0x0);
-//   delay(10);
-//   /* Set the requested operating mode (see section 3.3) */
-//   setMode(mode);
-//   delay(20);
-
-//   return true;
-// }
-
-    /* Что-то пошло не так */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while (1)
-      ;
-  }
-
-  delay(1000);
-
-  /* Это отвечает за использование внешнего кристала. Я пока не понимаю как и куда оно работает */
-  bno.setExtCrystalUse(true);
-
-  /* Функция выводит некоторые базовые характеристики сенсора */
-  displaySensorDetails();
-}
-
-void loop() {
-  /* Get a new sensor event */
-  sensors_event_t event;
-  imu::Quaternion quat;
-  bno.getEvent(&event, Adafruit_BNO055);  //если убрать второй аргумент (с одним аргументов запустить) в функции будут углы эйлера.
-  quat = bno.getQuat();
-
-  /* Board layout:
-         +----------+
-         |         *| RST   PITCH  ROLL  HEADING
-     ADR |*        *| SCL
-     INT |*        *| SDA     ^            /->
-     PS1 |*        *| GND     |            |
-     PS0 |*        *| 3VO     Y    Z-->    \-X
-         |         *| VIN
-         +----------+
-  */
 
   /* The processing sketch expects data as roll, pitch, heading */
   Serial.print(F("Orientation: "));
@@ -432,20 +307,7 @@ void loop() {
   Serial.print((float)event.orientation.z);
   Serial.println(F(""));
 
-
-  Serial.print(quat.w());
-  Serial.print(" + ");
-  Serial.print(quat.x());
-  Serial.print("x + ");
-  Serial.print(quat.y());
-  Serial.print("y + ");
-  Serial.print(quat.z());
-  Serial.println("z");
-
-
-
   /* Also send calibration data for each sensor. */
-  /*
   uint8_t sys, gyro, accel, mag = 0;
   bno.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print(F("Calibration: "));
@@ -456,6 +318,6 @@ void loop() {
   Serial.print(accel, DEC);
   Serial.print(F(" "));
   Serial.println(mag, DEC);
-  */
+
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
